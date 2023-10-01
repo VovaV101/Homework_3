@@ -1,0 +1,66 @@
+from datetime import date, timedelta
+
+def get_birthdays_per_week(users):
+    if not users:
+        return {}
+
+    
+    birthdays_by_day = {
+        'Monday': [],
+        'Tuesday': [],
+        'Wednesday': [],
+        'Thursday': [],
+        'Friday': [],
+        'Saturday': [],
+        'Sunday': [],
+    }
+
+    
+    today = date.today()
+
+    
+    def move_to_next_weekday(day, weekday):
+        days_until_weekday = (weekday - day.weekday() + 7) % 7
+        return day + timedelta(days=days_until_weekday)
+
+   
+    if not users:
+        return birthdays_by_day  
+
+    
+    for user in users:
+        birthday = user["birthday"]
+
+       
+        days_until_birthday = (birthday - today).days
+
+        if days_until_birthday < 0:
+            next_birthday = birthday.replace(year=today.year + 1)
+        else:
+            next_birthday = birthday
+
+        
+        if 0 <= (next_birthday - today).days <= 7:
+            day_name = next_birthday.strftime("%A")
+
+            if day_name in ['Saturday', 'Sunday']:
+                next_weekday = move_to_next_weekday(next_birthday, 0) 
+                day_name = next_weekday.strftime("%A")
+
+            birthdays_by_day[day_name].append(user["name"])
+
+    birthdays_by_day = {key: value for key, value in birthdays_by_day.items() if value}
+
+    return birthdays_by_day
+
+
+if __name__ == "__main__":
+    users = [
+        {"name": "Jan Koum", "birthday": datetime(1976, 1, 1).date()},
+    ]
+
+    result = get_birthdays_per_week(users)
+    print(result)
+    # Виводимо результат
+    for day_name, names in result.items():
+        print(f"{day_name}: {', '.join(names)}")
